@@ -23,6 +23,16 @@ def three_or_six():
     print("You entered an invalid input. You will be redirected to the question.")
     return three_or_six()  
 
+def add_workouts(muscle, group):
+  cur_len = len(group)
+  while len(group) is cur_len:
+    for exercise in muscle:
+      add = input(f"Would you like {exercise} to be included in your workout? Enter 'Y' or 'y' for yes and any other character(s) for no.")
+      if add.upper() == 'Y':
+        group.append(exercise)
+    if len(group) is cur_len:
+      print("You have not included any exercises. You will be reprompted now.")
+
 def main():
   """Shows basic usage of the Google Calendar API.
   Prints the start and name of the next 10 events on the user's calendar.
@@ -53,37 +63,55 @@ def main():
     days_in_week = three_or_six()
 
     # Create push day routine
-    triceps = ["Skull Crushers", 
-               "Standing Tricep Push Down",]
-    shoulders = ["Dumbbell Lateral Raises", 
-                 "Shoulder Press"]
-    pecs = ["Standing Cable Crossovers",
-            "Seated Machine Fly"]
-    chest = ["Incline DB Bench Press", 
-            "Flat DB Bench Press"]
-    print("You will first choose exercises for your triceps.")
-    while triceps:
-      add = input(f"Would you like {triceps[0]} to be included in your workout")
+    triceps = ["Skull Crushers", "Standing Tricep Push Down",]
+    shoulders = ["Dumbbell Lateral Raises", "Shoulder Press"]
+    pecs = ["Standing Cable Crossovers", "Seated Machine Fly"]
+    chest = ["Incline DB Bench Press", "Flat DB Bench Press"]
     push = []
-
+    print("To begin, you will now choose exercises for push day, which typically targets chest, shoulders, and triceps.")
+    print("You will first choose tricep exercises.You are required to include at least one tricep exercise.")
+    add_workouts(triceps, push)
+    print("You will now choose shoulder exercises.You are required to include at least one shoulder exercise.")
+    add_workouts(shoulders, push)
+    print("You will now choose pecs exercises.You are required to include at least one pecs exercise.")
+    add_workouts(pecs, push)
+    print("You will now choose chest exercises.You are required to include at least one chest exercise.")
+    add_workouts(chest, push)
     
-
-    vertical_rows = ["Pull-Ups", 
-                     "Lat Pulldowns",
-                     "Shrugs DB"]
-    horizontal_rows = ["Iso-Lateral Low Row",
-                       "Cable Rows",]
-    biceps = ["DB Bicep Curls"]
-    rear_delts = ["Seated Machine Reverse Fly"]
+    vertical_rows = ["Pull-Ups", "Lat Pulldowns", "Shrugs DB"]
+    horizontal_rows = ["Iso-Lateral Low Row", "Cable Rows",]
+    biceps = ["Bicep Curls", "Reverse Bicep Curls"]
+    rear_delts = ["Seated Machine Reverse Fly", "Standing Cable Reverse Fly"]
     pull = []
-    legs = ["Barbell Back Squat",
-            "Leg Press",
-            "Leg Curl (lying)",
-            "Standing Calf Raise",
-            "Hip Abduction",
-            "Barbell Hip Thrusts",
-            "Seated Leg Extensions"]
-    
+    print("You will now choose exercises for pull day, which typically targets back and biceps.")
+    print("First, choose at least one vertical row exercise.")
+    add_workouts(vertical_rows, pull)
+    print("Next, choose at least one horizontal row exercise.")
+    add_workouts(horizontal_rows, pull)
+    print("Next, choose at least one biceps exercise.")
+    add_workouts(biceps, pull)
+    print("Lastly, choose at least one rear delt exercise.")
+    add_workouts(rear_delts, pull)
+
+    squats = ["Barbell Back Squat", "Pendulum Squat"]
+    hamstrings = ["Leg Curl (lying)", "Hamstring Curl"]
+    calves = ["Standing Calf Raise", "Seated Calf Raise"]
+    hips = ["Hip Abduction", "Barbell Hip Thrusts"]
+    quads = ["Leg Press", "Seated Leg Extensions"]
+    legs = []
+    print("You will now choose exercises for leg day.")
+    print("First, choose at least one squatting exercise.")
+    add_workouts(squats, legs)
+    print("Next, choose at least one hamstring exercise.")
+    add_workouts(hamstrings, legs)
+    print("Next, choose at least one calf exercise.")
+    add_workouts(calves, legs)
+    print("Lastly, choose at least one hip exercise.")
+    add_workouts(hips, legs)
+    print("Lastly, choose at least one quadriceps exercise.")
+    add_workouts(quads, legs)
+
+    print(f"Push: {push}\nPull:{pull}\nLegs:{legs}")
     # Call the Calendar API
     timezone = pytz.timezone("America/Indiana/Knox") # This indicates Central Standard Time. Full list of timezones available at https://mljar.com/blog/list-pytz-timezones/.
     now = datetime.datetime.now(timezone).isoformat()
