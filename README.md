@@ -1,1 +1,6 @@
 # google-calendar-automation
+I created this project out of an interest in learning how application programming interfaces (APIs) work. I chose to work with the Google Calendar API because I use the calendar everday to manage my classes, workouts, and other activities, so I was interested in learning how it worked. My goal with this project is to create programs that help people manage their time by inputting customized schedules into their calendars based on their preferences. 
+
+The file labeled 'quickstart.py' was not created by me. That is example code from the Google Calendar API documentation. I included it in here for my reference.
+
+The file labeled 'workout_adder.py' was created by me. This code uses the Google Calendar API and user input to add a customized Push-Pull-Leg (PPL) routine to a user's Google Calendar. It is customizable because it asks the user how long each workout should last, on which days the user would like to train, and which exercises to include. This program may encourage individuals to workout; however, please note that nothing in this project qualifies as official health, fitness, or lifting advice. Feel free to request health advice from your doctor or other qualified professional.
