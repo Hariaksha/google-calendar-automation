@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 def three_or_six():
-  inp = input("Rest days are important to remain consistent and allow your muscles to grow! With this in mind, would you like to workout 3 or 6 times a week?")
+  inp = input("Rest days are important to remain consistent and allow your muscles to grow! With this in mind, would you like to workout 3 (MWF) or 6 (all days except Saturday) times a week?")
   if inp == "3":
     print("You chose to work out 3 days per week.")
     return 3
@@ -59,7 +59,6 @@ def main():
   try:
     service = build("calendar", "v3", credentials=creds)
     print("Welcome to the Workout Adder Program! Through this program, you will create your own customized push-pull-leg (PPL) workout routine.")
-    minutes = input("First, how many minutes should each workout last? ")
     days_in_week = three_or_six()
 
     # Create push day routine
@@ -78,6 +77,7 @@ def main():
     print("You will now choose chest exercises.You are required to include at least one chest exercise.")
     add_workouts(chest, push)
     
+    # Create pull day routine
     vertical_rows = ["Pull-Ups", "Lat Pulldowns", "Shrugs DB"]
     horizontal_rows = ["Iso-Lateral Low Row", "Cable Rows",]
     biceps = ["Bicep Curls", "Reverse Bicep Curls"]
@@ -93,6 +93,7 @@ def main():
     print("Lastly, choose at least one rear delt exercise.")
     add_workouts(rear_delts, pull)
 
+    # Create leg day routine
     squats = ["Barbell Back Squat", "Pendulum Squat"]
     hamstrings = ["Leg Curl (lying)", "Hamstring Curl"]
     calves = ["Standing Calf Raise", "Seated Calf Raise"]
@@ -111,36 +112,89 @@ def main():
     print("Lastly, choose at least one quadriceps exercise.")
     add_workouts(quads, legs)
 
-    print(f"Push: {push}\nPull:{pull}\nLegs:{legs}")
     # Call the Calendar API
     timezone = pytz.timezone("America/Indiana/Knox") # This indicates Central Standard Time. Full list of timezones available at https://mljar.com/blog/list-pytz-timezones/.
     now = datetime.datetime.now(timezone).isoformat()
-    print("Getting the upcoming 10 events")
-    events_result = (
-        service.events()
-        .list(
-            calendarId="primary",
-            timeMin=now,
-            maxResults=10,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        .execute()
-    )
-    events = events_result.get("items", [])
 
-    if not events:
-      print("No upcoming events found.")
-      return
+    #Create a new calendar
+    new_calendar = {
+        'summary': 'PPL Exercise Calendar',
+        'timeZone': 'America/Indiana/Knox'
+    }
+    created_calendar = service.calendars().insert(body=new_calendar).execute()
+    print(f"Created calendar: {created_calendar['id']}")
 
-    # Prints the start and name of the next 10 events
-    for event in events:
-      start = event["start"].get("dateTime", event["start"].get("date"))
-      print(start, event["summary"])
+    push_description = ""
+    pull_description = ""
+    legs_description = ""
+    for exercise in push:
+      push_description += (exercise + "\n")
+    for exercise in pull:
+      pull_description += (exercise + "\n")
+    for exercise in legs:
+      legs_description += (exercise + "\n")
+
+    today = datetime.date.today()
+    days_until_sunday = (6 - today.weekday()) % 7
+    next_sunday = today + datetime.timedelta(days=days_until_sunday)
+    next_monday = next_sunday + datetime.timedelta(days=1)
+    next_tuesday = next_sunday + datetime.timedelta(days=2)
+
+    sunday_start_time = datetime.datetime(next_sunday.year, next_sunday.month, next_sunday.day, 6, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+    sunday_end_time = datetime.datetime(next_sunday.year, next_sunday.month, next_sunday.day, 7, 30, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+    monday_start_time = datetime.datetime(next_monday.year, next_monday.month, next_monday.day, 6, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+    monday_end_time = datetime.datetime(next_monday.year, next_monday.month, next_monday.day, 7, 30, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+    tuesday_start_time = datetime.datetime(next_tuesday.year, next_tuesday.month, next_tuesday.day, 6, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+    tuesday_end_time = datetime.datetime(next_tuesday.year, next_tuesday.month, next_tuesday.day, 7, 30, tzinfo=datetime.timezone(datetime.timedelta(hours=0)))
+
+    push_event = {
+      'summary': 'Push Day',
+      'description': push_description,
+      'recurrence': ['RRULE:FREQ=WEEKLY;BYDAY=SU, WE'],
+      'start': {
+        'dateTime': sunday_start_time.isoformat(),
+        'timeZone': timezone
+      },
+      'end': {
+        'dateTime': sunday_end_time.isoformat(),
+        'timeZone': timezone
+      }
+    }
+
+    pull_event = {
+      'summary': 'Pull Day',
+      'description': pull_description,
+      'recurrence': ['RRULE:FREQ=WEEKLY;BYDAY=MO, TH'],
+      'start': {
+        'dateTime': monday_start_time.isoformat(),
+        'timeZone': timezone
+      },
+      'end': {
+        'dateTime': monday_end_time.isoformat(),
+        'timeZone': timezone
+      }
+    }
+
+    legs_event = {
+      'summary': 'Legs Day',
+      'description': legs_description,
+      'recurrence': ['RRULE:FREQ=WEEKLY;BYDAY=TU, FR'],
+      'start': {
+        'dateTime': tuesday_start_time.isoformat(),
+        'timeZone': timezone
+      },
+      'end': {
+        'dateTime': tuesday_end_time.isoformat(),
+        'timeZone': timezone
+      }
+    }
+
+    recurring_push_event = service.events().insert(calendarId='PPL Exercise Calendar', body=push_event).execute()
+    recurring_pull_event = service.events().insert(calendarId='PPL Exercise Calendar', body=pull_event).execute()
+    recurring_legs_event = service.events().insert(calendarId='PPL Exercise Calendar', body=legs_event).execute()
 
   except HttpError as error:
     print(f"An error occurred: {error}")
-
 
 if __name__ == "__main__":
   main()
